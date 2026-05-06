@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Daily English · 单词连连看</title>
+    <style>
+        :root {
+            --yellow: #FFD200;
+            --blue: #4DA8E8;
+            --white: #FFFFFF;
+            --dark: #1A1A2E;
+            --bg: #F0F4F8;
+            --card-bg: #FFFFFF;
+            --text: #1E2B3C;
+            --text-light: #5E6F82;
+            --success: #34C759;
+            --danger: #FF3B30;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo-text {
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--text);
+        }
+        .game-stats {
+            display: flex;
+            gap: 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .stat-value {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .progress-wrap {
+            background: var(--white);
+            border-radius: 12px;
+            height: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--yellow), #FFB800);
+            border-radius: 12px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .voice-hint {
+            background: #FFF3CD;
+            border: 1px solid #FFD200;
+            border-radius: 12px;
+            padding: 8px 14px;
+            font-size: 0.75rem;
+            color: #856404;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .voice-hint button {
+            background: var(--yellow);
+            border: none;
+            padding: 6px 14px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .card {
+            aspect-ratio: 3 / 3.2;
+            background: var(--white);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 2.5px solid transparent;
+            position: relative;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+        .card:active {
+            transform: scale(0.95);
+        }
+        .card.selected {
+            border-color: var(--yellow);
+            background: #FFFDE8;
+            box-shadow: 0 0 0 4px rgba(255, 210, 0, 0.2);
+            transform: scale(1.03);
+            z-index: 2;
+        }
+        .card.matched {
+            border-color: var(--success);
+            background: #E8F8EE;
+            opacity: 0.4;
+            pointer-events: none;
+            transform: scale(0.9);
+            transition: all 0.4s ease;
+        }
+        .card.wrong-flash {
+            border-color: var(--danger) !important;
+            background: #FFF0F0 !important;
+            animation: shake 0.4s ease;
+        }
+        .card.word-card {
+            background: #F8FAFE;
+            border-color: #E1E8F0;
+            color: #1A3A5C;
+            font-size: 0.8rem;
+        }
+        .card.meaning-card {
+            background: #FFFBEB;
+            border-color: #F0E6C0;
+            color: #5C3D00;
+            font-size: 0.82rem;
+        }
+
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-6px);
+            }
+            40% {
+                transform: translateX(6px);
+            }
+            60% {
+                transform: translateX(-4px);
+            }
+            80% {
+                transform: translateX(4px);
+            }
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .card.new-card {
+            animation: popIn 0.35s ease;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .result-card {
+            background: white;
+            border-radius: 24px;
+            padding: 28px 20px 20px;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        .result-stars {
+            font-size: 3rem;
+            margin: 8px 0;
+        }
+        .result-energy {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #FF9500;
+            margin: 8px 0;
+        }
+        .result-detail {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+            margin: 6px;
+            width: calc(100% - 12px);
+        }
+        .btn-primary {
+            background: var(--yellow);
+            color: var(--text);
+            box-shadow: 0 6px 16px rgba(255, 210, 0, 0.35);
+        }
+        .btn-secondary {
+            background: white;
+            color: var(--text);
+            border: 2px solid #ddd;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .footer-info {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            background: #1A1A2E;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            animation: slideDown 0.3s ease, fadeOutToast 0.5s 1.5s ease forwards;
+            pointer-events: none;
+        }
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes fadeOutToast {
+            to {
+                opacity: 0;
+            }
+        }
+        .toast.error {
+            background: #FF3B30;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 360px) {
+            .game-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            .card {
+                font-size: 0.72rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container" id="gameContainer">
+        <div class="header">
+            <div class="header-left">
+                <span style="font-size:1.4rem;">📘</span>
+                <span class="logo-text">Daily English</span>
+            </div>
+            <div class="game-stats">
+                <div class="stat-item">⏱ <span class="stat-value" id="timerDisplay">0s</span></div>
+                <div class="stat-item">✅ <span class="stat-value" id="matchCount">0/6</span></div>
+            </div>
+        </div>
+
+        <div class="voice-hint hidden" id="voiceHint">
+            <span>🔊 点击激活单词朗读</span>
+            <button id="activateVoiceBtn">激活</button>
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="game-grid" id="gameGrid"></div>
+
+        <div class="footer-info">点击英文单词，再点击中文含义进行配对</div>
+    </div>
+
+    <div class="overlay hidden" id="resultOverlay">
+        <div class="result-card">
+            <div style="font-size:1.2rem;font-weight:700;">🎯 游戏结束</div>
+            <div class="result-stars" id="resultStars"></div>
+            <div class="result-energy" id="resultEnergy"></div>
+            <div class="result-detail" id="resultDetail"></div>
+            <button class="btn btn-primary" onclick="restartGame()">🔄 再来一局</button>
+            <button class="btn btn-secondary" onclick="viewWrongWords()">📋 查看错词</button>
+        </div>
+    </div>
+
+    <div class="overlay hidden" id="wrongOverlay">
+        <div class="result-card">
+            <div style="font-size:1.1rem;font-weight:700;">📋 本局错词</div>
+            <div id="wrongList" style="text-align:left;margin:12px 0;font-size:0.85rem;line-height:2;"></div>
+            <button class="btn btn-primary" onclick="closeWrongWords()">继续练习</button>
+        </div>
+    </div>
+
+    <div class="toast hidden" id="toast"></div>
+
+    <script>
+        (function() {
+            const allWords = [
+                { en: 'hello', zh: '你好' }, { en: 'goodbye', zh: '再见' }, { en: 'hi', zh: '嗨' },
+                { en: 'bye', zh: '拜拜' }, { en: 'good morning', zh: '早上好' }, { en: 'good afternoon',
+                zh: '下午好' },
+                { en: 'good evening', zh: '晚上好' }, { en: 'good night', zh: '晚安' }, { en: 'one', zh: '一' },
+                { en: 'two', zh: '二' }, { en: 'three', zh: '三' }, { en: 'four', zh: '四' },
+                { en: 'five', zh: '五' }, { en: 'six', zh: '六' }, { en: 'seven', zh: '七' },
+                { en: 'eight', zh: '八' }, { en: 'nine', zh: '九' }, { en: 'ten', zh: '十' },
+                { en: 'red', zh: '红色' }, { en: 'blue', zh: '蓝色' }, { en: 'yellow', zh: '黄色' },
+                { en: 'green', zh: '绿色' }, { en: 'orange', zh: '橙色' }, { en: 'purple', zh: '紫色' },
+                { en: 'pink', zh: '粉色' }, { en: 'white', zh: '白色' }, { en: 'black', zh: '黑色' },
+                { en: 'brown', zh: '棕色' }, { en: 'what', zh: '什么' }, { en: 'your', zh: '你的' },
+                { en: 'name', zh: '名字' }, { en: 'my', zh: '我的' }, { en: 'is', zh: '是' },
+                { en: 'I', zh: '我' }, { en: 'am', zh: '是' }, { en: 'how', zh: '怎样' },
+                { en: 'are', zh: '是' }, { en: 'you', zh: '你' }, { en: 'fine', zh: '好的' },
+                { en: 'thank', zh: '谢谢' }, { en: 'thanks', zh: '多谢' }, { en: 'please', zh: '请' },
+                { en: 'sorry', zh: '对不起' }, { en: 'yes', zh: '是' }, { en: 'no', zh: '不' },
+                { en: 'number', zh: '数字' }, { en: 'colour', zh: '颜色' }, { en: 'color', zh: '颜色' }
+            ];
+            const uniqueWords = [];
+            const seen = new Set();
+            allWords.forEach(w => {
+                const key = w.en + '|' + w.zh;
+                if (!seen.has(key)) { seen.add(key);
+                    uniqueWords.push(w); }
+            });
+
+            const PAIRS_PER_GAME = 6;
+            let currentWords = [];
+            let cards = [];
+            let selectedCard = null;
+            let matchedCount = 0;
+            let totalAttempts = 0;
+            let correctAttempts = 0;
+            let wrongWordsThisRound = [];
+            let timerSeconds = 0;
+            let timerInterval = null;
+            let gameStarted = false;
+            let gameOver = false;
+            let voiceEnabled = false;
+
+            const gameGrid = document.getElementById('gameGrid');
+            const matchCountEl = document.getElementById('matchCount');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const progressFill = document.getElementById('progressFill');
+            const resultOverlay = document.getElementById('resultOverlay');
+            const wrongOverlay = document.getElementById('wrongOverlay');
+            const resultStars = document.getElementById('resultStars');
+            const resultEnergy = document.getElementById('resultEnergy');
+            const resultDetail = document.getElementById('resultDetail');
+            const wrongList = document.getElementById('wrongList');
+            const toast = document.getElementById('toast');
+            const voiceHint = document.getElementById('voiceHint');
+            const activateVoiceBtn = document.getElementById('activateVoiceBtn');
+
+            function detectVoiceSupport() {
+                return ('speechSynthesis' in window);
+            }
+
+            const hasSpeechAPI = detectVoiceSupport();
+
+            if (!hasSpeechAPI) {
+                voiceHint.classList.remove('hidden');
+                voiceHint.querySelector('span').textContent = '⚠️ 此设备不支持语音朗读';
+                activateVoiceBtn.textContent = '知道了';
+                activateVoiceBtn.addEventListener('click', () => {
+                    voiceHint.classList.add('hidden');
+                });
+            } else {
+                voiceHint.classList.remove('hidden');
+                voiceHint.querySelector('span').textContent = '🔊 点击激活单词朗读';
+                activateVoiceBtn.textContent = '激活';
+                activateVoiceBtn.addEventListener('click', activateVoice);
+            }
+
+            function activateVoice() {
+                const testUtterance = new SpeechSynthesisUtterance('');
+                testUtterance.volume = 0;
+                testUtterance.rate = 2;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(testUtterance);
+                voiceEnabled = true;
+                voiceHint.classList.add('hidden');
+                showToast('✅ 语音已激活！配对成功时会朗读单词', false);
+            }
+
+            function speakWord(word) {
+                if (!voiceEnabled) return;
+                if (!('speechSynthesis' in window)) return;
+                try {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(word);
+                    utterance.lang = 'en-GB';
+                    utterance.rate = 0.85;
+                    utterance.pitch = 1.0;
+                    utterance.volume = 1.0;
+                    window.speechSynthesis.speak(utterance);
+                } catch (e) {
+                    console.log('语音播放失败:', e);
+                }
+            }
+
+            function showToast(msg, isError = false) {
+                toast.textContent = msg;
+                toast.className = 'toast' + (isError ? ' error' : '');
+                toast.classList.remove('hidden');
+                clearTimeout(toast._timeout);
+                toast._timeout = setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 2000);
+            }
+
+            function shuffle(arr) {
+                const a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            }
+
+            function initGame() {
+                matchedCount = 0;
+                totalAttempts = 0;
+                correctAttempts = 0;
+                wrongWordsThisRound = [];
+                timerSeconds = 0;
+                gameStarted = false;
+                gameOver = false;
+                selectedCard = null;
+                clearInterval(timerInterval);
+                timerInterval = null;
+
+                const shuffled = shuffle(uniqueWords);
+                currentWords = shuffled.slice(0, PAIRS_PER_GAME);
+
+                cards = [];
+                currentWords.forEach((w, idx) => {
+                    cards.push({ id: 'en-' + idx, type: 'en', text: w.en, pairId: idx,
+                        matched: false });
+                    cards.push({ id: 'zh-' + idx, type: 'zh', text: w.zh, pairId: idx,
+                        matched: false });
+                });
+                cards = shuffle(cards);
+
+                matchCountEl.textContent = '0/' + PAIRS_PER_GAME;
+                timerDisplay.textContent = '0s';
+                progressFill.style.width = '0%';
+                resultOverlay.classList.add('hidden');
+                wrongOverlay.classList.add('hidden');
+                gameGrid.classList.remove('hidden');
+                document.querySelector('.footer-info').classList.remove('hidden');
+
+                renderCards();
+            }
+
+            function renderCards() {
+                gameGrid.innerHTML = '';
+                cards.forEach(card => {
+                    const el = document.createElement('div');
+                    el.className = 'card new-card';
+                    if (card.type === 'en') el.classList.add('word-card');
+                    else el.classList.add('meaning-card');
+                    if (card.matched) el.classList.add('matched');
+                    el.textContent = card.text;
+                    el.dataset.cardId = card.id;
+                    el.addEventListener('click', () => onCardClick(card, el));
+                    gameGrid.appendChild(el);
+                });
+            }
+
+            function onCardClick(card, el) {
+                if (gameOver) return;
+                if (card.matched) return;
+                if (el.classList.contains('selected')) {
+                    el.classList.remove('selected');
+                    selectedCard = null;
+                    return;
+                }
+
+                if (!gameStarted) {
+                    gameStarted = true;
+                    startTimer();
+                }
+
+                if (!selectedCard) {
+                    el.classList.add('selected');
+                    selectedCard = { card, el };
+                } else {
+                    const first = selectedCard;
+                    el.classList.add('selected');
+                    totalAttempts++;
+
+                    if (first.card.pairId === card.pairId && first.card.type !== card.type) {
+                        correctAttempts++;
+                        setTimeout(() => {
+                            first.el.classList.remove('selected');
+                            el.classList.remove('selected');
+                            first.el.classList.add('matched');
+                            el.classList.add('matched');
+                            first.card.matched = true;
+                            card.matched = true;
+                            matchedCount++;
+
+                            const wordText = first.card.type === 'en' ? first.card.text : card
+                                .text;
+                            speakWord(wordText);
+
+                            updateProgress();
+                            if (matchedCount >= PAIRS_PER_GAME) endGame();
+                        }, 200);
+                        selectedCard = null;
+                    } else {
+                        setTimeout(() => {
+                            first.el.classList.add('wrong-flash');
+                            el.classList.add('wrong-flash');
+                            showToast('再试试！', true);
+                            const wrongWord = first.card.type === 'en' ? first.card.text :
+                                card.text;
+                            const wrongZh = first.card.type === 'zh' ? first.card.text : card
+                                .text;
+                            if (!wrongWordsThisRound.find(w => w.en === wrongWord)) {
+                                wrongWordsThisRound.push({ en: wrongWord, zh: wrongZh });
+                            }
+                            setTimeout(() => {
+                                first.el.classList.remove('selected', 'wrong-flash');
+                                el.classList.remove('selected', 'wrong-flash');
+                            }, 400);
+                            selectedCard = null;
+                        }, 200);
+                        selectedCard = null;
+                    }
+                }
+            }
+
+            function updateProgress() {
+                matchCountEl.textContent = matchedCount + '/' + PAIRS_PER_GAME;
+                progressFill.style.width = (matchedCount / PAIRS_PER_GAME) * 100 + '%';
+            }
+
+            function startTimer() {
+                timerSeconds = 0;
+                timerDisplay.textContent = '0s';
+                timerInterval = setInterval(() => {
+                    timerSeconds++;
+                    timerDisplay.textContent = timerSeconds + 's';
+                }, 1000);
+            }
+
+            function stopTimer() {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
+            function endGame() {
+                gameOver = true;
+                stopTimer();
+                const accuracy = totalAttempts > 0 ? correctAttempts / totalAttempts : 0;
+                let stars = accuracy >= 1.0 ? 3 : accuracy >= 0.7 ? 2 : 1;
+                let energy = stars === 3 ? 10 : stars === 2 ? 5 : 2;
+                const starEmoji = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+                resultStars.textContent = starEmoji;
+                resultEnergy.textContent = '⚡ 获得 ' + energy + ' 个能量球';
+                resultDetail.innerHTML = `用时：${timerSeconds}秒<br>配对次数：${totalAttempts}次<br>正确率：${Math.round(accuracy * 100)}%<br>错词：${wrongWordsThisRound.length}个`;
+                saveWrongWords();
+                saveLearningRecord(stars, energy);
+                setTimeout(() => resultOverlay.classList.remove('hidden'), 500);
+            }
+
+            function saveWrongWords() {
+                if (wrongWordsThisRound.length === 0) return;
+                const stored = JSON.parse(localStorage.getItem('daily_english_error_words') || '[]');
+                wrongWordsThisRound.forEach(w => {
+                    const exists = stored.find(s => s.en === w.en);
+                    if (exists) {
+                        exists.count = (exists.count || 1) + 1;
+                        exists.lastError = new Date().toISOString().split('T')[0];
+                    } else {
+                        stored.push({ en: w.en, zh: w.zh, count: 1, lastError: new Date().toISOString()
+                                .split('T')[0], student: '未登录' });
+                    }
+                });
+                localStorage.setItem('daily_english_error_words', JSON.stringify(stored));
+            }
+
+            function saveLearningRecord(stars, energy) {
+                const today = new Date().toISOString().split('T')[0];
+                const stored = JSON.parse(localStorage.getItem('daily_english_learning_records') || '[]');
+                stored.push({ date: today, stars, wordsCorrect: matchedCount + '/' + PAIRS_PER_GAME,
+                    energyEarned: energy, timeSeconds: timerSeconds });
+                if (stored.length > 30) stored.splice(0, stored.length - 30);
+                localStorage.setItem('daily_english_learning_records', JSON.stringify(stored));
+            }
+
+            window.restartGame = function() {
+                resultOverlay.classList.add('hidden');
+                wrongOverlay.classList.add('hidden');
+                stopTimer();
+                initGame();
+            };
+
+            window.viewWrongWords = function() {
+                resultOverlay.classList.add('hidden');
+                if (wrongWordsThisRound.length === 0) {
+                    wrongList.innerHTML = '<div style="text-align:center;color:#34C759;">🎉 全部正确！太棒了！</div>';
+                } else {
+                    wrongList.innerHTML = wrongWordsThisRound.map(w => `<div><strong>${w.en}</strong> — ${w.zh}</div>`)
+                        .join('');
+                }
+                wrongOverlay.classList.remove('hidden');
+            };
+
+            window.closeWrongWords = function() {
+                wrongOverlay.classList.add('hidden');
+                initGame();
+            };
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'r' && gameOver) window.restartGame();
+            });
+
+            initGame();
+            console.log('📘 Daily English 单词连连看已就绪');
+        })();
+    </script>
+</body>
+</html>
