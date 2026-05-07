@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="description" content="📘 Daily English｜三年级Join In单词消消乐｜Nora & Joen专属英语复习工具" />
   <title>📘 Daily English</title>
-
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkRhaWx5IEVuZ2xpc2giLAogICJzaG9ydF9uYW1lIjogIkRhaWx5IEVuZ2xpc2giLAogICJpY29ucyI6IFt7CiAgICAic3JjIjogImRhdGE6aW1hZ2UvcG5nK3ZiYXNlNjQsSVZCT1J3MEtHZ29BQUFBTnlBQUFBRGdBTUFBQUFBRVVBQUFBQXdBQUFBRkFBQUFCSUFBQUFDa0FBQUFBRTBCQUFBQURBQUFBQ0NBQUFBQkNBQUFBQmNBQUFBQkNBQUFBQmNBQUFBQkNBQUFBQmNBQUFBQkNBQUFBQmNBQUFBQkNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQmNBQUFBQm......IiwKICAic2l6ZXMiOiAiMTQ0eDE0NCIsCiAgInR5cGUiOiAiaW1hZ2UvcG5nIgp9XSwKICAic3RhcnRfdXJsIjogIi4vIiwKICAidGl0bGUiOiAiRGFpbHkgRW5nbGlzaCIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzRGQTFFMSIsCiAgInRoZW1lX2NvbG9yIjogIiM0REE4RTgiCn0=" />
   <style>
     :root {
       --primary: #4DA8E8;
@@ -41,6 +38,46 @@
       min-height: 100vh;
       overflow-x: hidden;
       text-rendering: optimizeLegibility;
+      position: relative;
+    }
+    .debug-panel {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .debug-btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .debug-output {
+      display: none;
+      position: fixed;
+      bottom: 70px;
+      left: 0;
+      right: 0;
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(30, 43, 60, 0.95);
+      color: #0f0;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      z-index: 9998;
+      border-radius: 12px 12px 0 0;
+      margin: 0 12px;
     }
     .container {
       max-width: 420px;
@@ -341,6 +378,11 @@
   </style>
 </head>
 <body>
+  <div class="debug-panel">
+    <button class="debug-btn" id="debug-toggle">🐛 调试</button>
+    <div class="debug-output" id="debug-output"></div>
+  </div>
+
   <!-- 🔑 Login Screen -->
   <div id="login-screen" class="login-screen">
     <h1 class="login-title">📘 Daily English</h1>
@@ -454,6 +496,39 @@
 
   <script>
     // ======================
+    // 🐛 DEBUG HELPER
+    // ======================
+    const debugOutput = document.getElementById('debug-output');
+    const debugToggle = document.getElementById('debug-toggle');
+    
+    function debugLog(msg, type = 'info') {
+      console.log(`[DEBUG] ${msg}`);
+      if (debugOutput) {
+        const line = document.createElement('div');
+        line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        line.style.color = type === 'error' ? '#f66' : '#0f0';
+        debugOutput.appendChild(line);
+        debugOutput.scrollTop = debugOutput.scrollHeight;
+      }
+    }
+
+    // 全局错误捕获
+    window.onerror = function(msg, source, lineno, colno, error) {
+      debugLog(`❌ 全局错误: ${msg} (行: ${lineno})`, 'error');
+    };
+
+    debugToggle.addEventListener('click', () => {
+      if (debugOutput.style.display === 'block') {
+        debugOutput.style.display = 'none';
+      } else {
+        debugOutput.style.display = 'block';
+        debugLog('🐛 调试面板已打开，点击名字按钮查看日志');
+      }
+    });
+
+    debugLog('脚本开始执行');
+
+    // ======================
     // 🔑 CORE DATA & STORAGE
     // ======================
     const VOCAB = [
@@ -485,7 +560,7 @@
           const v = localStorage.getItem(key);
           return v ? JSON.parse(v) : def;
         } catch (e) {
-          console.warn('LS get error:', e);
+          debugLog(`LS get error: ${e.message}`, 'error');
           return def;
         }
       },
@@ -493,7 +568,7 @@
         try {
           localStorage.setItem(key, JSON.stringify(val));
         } catch (e) {
-          console.warn('LS set error:', e);
+          debugLog(`LS set error: ${e.message}`, 'error');
         }
       }
     };
@@ -507,29 +582,18 @@
     if (LS.get(STORAGE_KEYS.joenHistory) === null) LS.set(STORAGE_KEYS.joenHistory, []);
 
     // ======================
-    // 🎙️ SPEECH MODULE (FIXED)
+    // 🎙️ SPEECH MODULE
     // ======================
     const Speech = {
       synth: null,
-      utterance: null,
       isActivated: false,
-      queue: [],
       init() {
         if ('speechSynthesis' in window) {
           this.synth = window.speechSynthesis;
-          if (this.synth.getVoices().length !== 0) {
-            this.loadVoices();
-          } else {
-            this.synth.onvoiceschanged = () => this.loadVoices();
-          }
+          debugLog('✅ Speech synthesis available');
+        } else {
+          debugLog('⚠️ Speech synthesis not available');
         }
-      },
-      loadVoices() {
-        const voices = this.synth.getVoices();
-        this.voice = voices.find(v => v.lang === 'en-GB' && v.name.includes('English')) ||
-                     voices.find(v => v.lang === 'en-US') ||
-                     voices[0] || null;
-        console.log('✅ Speech voices loaded:', this.voice?.name || 'default');
       },
       activate() {
         if (this.isActivated) return;
@@ -539,261 +603,24 @@
           this.synth.speak(dummy);
           this.synth.cancel();
           this.isActivated = true;
-          document.getElementById('speech-notice')?.style.display = 'none';
-          console.log('✅ Speech activated');
+          document.getElementById('speech-notice').style.display = 'none';
+          debugLog('✅ Speech activated');
         } catch (e) {
-          console.error('🔊 Activation failed:', e);
-          this.showFallbackAlert();
+          debugLog(`🔊 Activation failed: ${e.message}`, 'error');
         }
       },
-      speak(text, options = {}) {
-        if (!this.isActivated || !this.synth || !text?.trim()) return;
-        if (this.utterance && this.synth.speaking) this.synth.cancel();
-        this.utterance = new SpeechSynthesisUtterance(text.trim());
-        this.utterance.voice = this.voice || null;
-        this.utterance.rate = options.rate ?? 0.85;
-        this.utterance.pitch = options.pitch ?? 1;
-        this.utterance.volume = options.volume ?? 0.9;
-        this.utterance.lang = 'en-GB';
-        this.utterance.onend = () => {
-          if (this.queue.length > 0) {
-            const next = this.queue.shift();
-            setTimeout(() => this.speak(next.text, next.options), 300);
-          }
-        };
-        this.utterance.onerror = (e) => {
-          console.error('🔊 Speech error:', e);
-          if (text && !text.includes(' ')) {
-            this.speak(`单词是：${text}`, { rate: 0.8 });
-          }
-        };
-        this.synth.speak(this.utterance);
-      },
-      queueSpeak(text, options = {}) {
-        this.queue.push({ text, options });
-        if (!this.synth.speaking && this.queue.length === 1) {
-          this.speak(text, options);
-        }
-      },
-      showFallbackAlert() {
-        const el = document.createElement('div');
-        el.className = 'modal';
-        el.innerHTML = `
-          <div class="modal-content" style="max-width:360px;padding:20px;">
-            <h2>⚠️ 语音提示</h2>
-            <p style="margin:16px 0;">你的浏览器暂不支持英文朗读<br>但游戏照常进行！</p>
-            <button class="btn accent">我知道了</button>
-          </div>
-        `;
-        document.body.appendChild(el);
-        el.classList.add('active');
-        el.querySelector('button').onclick = () => el.remove();
+      speak(text) {
+        if (!this.isActivated || !this.synth) return;
+        if (this.synth.speaking) this.synth.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-GB';
+        u.rate = 0.85;
+        this.synth.speak(u);
       }
     };
 
     // ======================
-    // 🎤 FOLLOW-ALONG SCORING (FIXED)
-    // ======================
-    const FollowAlong = {
-      recognition: null,
-      isListening: false,
-      currentWord: '',
-      startTime: 0,
-      endTime: 0,
-      phonemeMap: {
-        'hello': ['h', 'e', 'l', 'o'], 'hi': ['h', 'aɪ'], 'bye': ['b', 'aɪ'],
-        'red': ['r', 'ɛ', 'd'], 'blue': ['b', 'l', 'uː'], 'yellow': ['j', 'ɛ', 'l', 'oʊ'],
-        'one': ['w', 'ʌ', 'n'], 'two': ['t', 'uː'], 'three': ['θ', 'r', 'iː'],
-        'what': ['w', 'ɒ', 't'], 'name': ['n', 'eɪ', 'm'], 'my': ['m', 'aɪ'],
-        'is': ['ɪ', 'z'], 'I': ['aɪ'], 'am': ['æ', 'm'], 'how': ['h', 'aʊ'],
-        'are': ['ɑːr'], 'you': ['j', 'uː'], 'fine': ['f', 'aɪ', 'n'],
-        'thank': ['θ', 'æ', 'ŋ'], 'thanks': ['θ', 'æ', 'ŋ', 'k', 's'],
-        'please': ['p', 'l', 'iː', 'z'], 'sorry': ['s', 'ɒ', 'r', 'i'],
-        'yes': ['j', 'ɛ', 's'], 'no': ['n', 'əʊ'], 'number': ['n', 'ʌ', 'm', 'b', 'ə'],
-        'colour': ['k', 'ʌ', 'l', 'ə']
-      },
-
-      init() {
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-          this.recognition = new SpeechRecognition();
-          this.recognition.continuous = false;
-          this.recognition.interimResults = false;
-          this.recognition.lang = 'en-GB';
-          this.recognition.maxAlternatives = 1;
-
-          this.recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript.trim().toLowerCase();
-            this.endTime = Date.now();
-            this.scorePronunciation(transcript);
-          };
-
-          this.recognition.onerror = (event) => {
-            console.warn('🎤 Recognition error:', event.error);
-            this.showFeedback('⚠️ 请再试一次，或点击【听我读】听示范', 'warn');
-          };
-
-          this.recognition.onend = () => {
-            this.isListening = false;
-          };
-
-          console.log('✅ FollowAlong: SpeechRecognition available');
-        } else {
-          console.warn('❌ FollowAlong: SpeechRecognition NOT supported');
-          document.getElementById('follow-along-btn')?.remove();
-        }
-      },
-
-      start(word) {
-        if (!this.recognition) {
-          this.showFeedback('❌ 你的设备不支持跟读评分', 'error');
-          return;
-        }
-        if (this.isListening) return;
-
-        this.currentWord = word.toLowerCase();
-        this.startTime = Date.now();
-        this.isListening = true;
-
-        try {
-          this.recognition.start();
-          this.showFeedback(`🎤 请大声读出：${word}！`, 'recording');
-          setTimeout(() => {
-            if (this.isListening && this.recognition) {
-              this.recognition.stop();
-              this.showFeedback('⏰ 时间到，请再试一次', 'warn');
-            }
-          }, 3000);
-        } catch (e) {
-          console.error('🎤 Start failed:', e);
-          this.showFeedback('❌ 请允许麦克风权限（点浏览器地址栏锁图标→允许）', 'error');
-          this.isListening = false;
-        }
-      },
-
-      scorePronunciation(transcript) {
-        const word = this.currentWord;
-        const refPhonemes = this.phonemeMap[word] || [];
-        const userPhonemes = this.transcriptToPhonemes(transcript);
-
-        let clarity = 0;
-        let durationScore = 0;
-        let accuracy = 0;
-
-        if (refPhonemes.length > 0 && userPhonemes.length > 0) {
-          const matched = refPhonemes.filter(p => userPhonemes.some(up => this.similarPhoneme(p, up)));
-          clarity = Math.round((matched.length / refPhonemes.length) * 100);
-        }
-
-        const idealMs = Math.max(800, refPhonemes.length * 400);
-        const actualMs = this.endTime - this.startTime;
-        durationScore = Math.max(0, Math.min(100, 100 - Math.abs(actualMs - idealMs) / 10));
-
-        const cleanRef = word.replace(/[^a-z]/g, '');
-        const cleanUser = transcript.replace(/[^a-z]/g, '');
-        accuracy = this.stringSimilarity(cleanRef, cleanUser);
-
-        const finalScore = Math.round(
-          clarity * 0.4 +
-          durationScore * 0.3 +
-          accuracy * 0.3
-        );
-
-        let stars = '⭐';
-        if (finalScore >= 90) stars = '🌟';
-        else if (finalScore >= 75) stars = '✨';
-
-        const encouragements = [
-          `你把 ${word} 发得像 Toby 老师一样棒！`,
-          `太棒了！${word} 就是这样读的！`,
-          `发音清晰又自信，继续加油！`,
-          `Wow! ${word} 说得超标准～`,
-          `👍 你已经掌握 ${word} 的秘密发音啦！`
-        ];
-        const msg = `${stars} ${encouragements[Math.floor(Math.random() * encouragements.length)]}`;
-
-        this.showFeedback(msg, 'success', finalScore);
-      },
-
-      transcriptToPhonemes(transcript) {
-        const map = {
-          'hello': ['h', 'e', 'l', 'o'], 'hi': ['h', 'aɪ'], 'bye': ['b', 'aɪ'],
-          'red': ['r', 'ɛ', 'd'], 'blue': ['b', 'l', 'uː'], 'yellow': ['j', 'ɛ', 'l', 'oʊ'],
-          'one': ['w', 'ʌ', 'n'], 'two': ['t', 'uː'], 'three': ['θ', 'r', 'iː'],
-          'what': ['w', 'ɒ', 't'], 'name': ['n', 'eɪ', 'm'], 'my': ['m', 'aɪ'],
-          'is': ['ɪ', 'z'], 'i': ['aɪ'], 'am': ['æ', 'm'], 'how': ['h', 'aʊ'],
-          'are': ['ɑːr'], 'you': ['j', 'uː'], 'fine': ['f', 'aɪ', 'n'],
-          'thank': ['θ', 'æ', 'ŋ'], 'thanks': ['θ', 'æ', 'ŋ', 'k', 's'],
-          'please': ['p', 'l', 'iː', 'z'], 'sorry': ['s', 'ɒ', 'r', 'i'],
-          'yes': ['j', 'ɛ', 's'], 'no': ['n', 'əʊ'], 'number': ['n', 'ʌ', 'm', 'b', 'ə'],
-          'colour': ['k', 'ʌ', 'l', 'ə']
-        };
-        return (map[transcript] || []).concat(
-          Array.from(transcript).filter(c => /[bcdfghjklmnpqrstvwxyz]/i.test(c)).map(c => c.toLowerCase())
-        );
-      },
-
-      similarPhoneme(a, b) {
-        const groups = [
-          ['t', 'd'], ['s', 'z'], ['k', 'g'], ['p', 'b'], ['f', 'v'], ['θ', 'ð'],
-          ['r', 'l'], ['j', 'y'], ['w', 'u'], ['i', 'ɪ', 'iː'], ['e', 'ɛ', 'eɪ'],
-          ['a', 'æ', 'ɑː', 'ʌ', 'ə'], ['o', 'ɔː', 'oʊ', 'əʊ'], ['u', 'uː', 'ʊ']
-        ];
-        return a === b || groups.some(g => g.includes(a) && g.includes(b));
-      },
-
-      stringSimilarity(a, b) {
-        const la = a.length, lb = b.length;
-        if (la === 0 && lb === 0) return 100;
-        if (la === 0 || lb === 0) return 0;
-        const d = [];
-        for (let i = 0; i <= la; i++) d[i] = [i];
-        for (let j = 0; j <= lb; j++) d[0][j] = j;
-        for (let i = 1; i <= la; i++) {
-          for (let j = 1; j <= lb; j++) {
-            d[i][j] = Math.min(
-              d[i-1][j] + 1,
-              d[i][j-1] + 1,
-              d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1)
-            );
-          }
-        }
-        return Math.round(100 - (d[la][lb] / Math.max(la, lb)) * 100);
-      },
-
-      showFeedback(text, type, score = null) {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-          <div class="modal-content" style="max-width:360px;padding:20px;">
-            <h2 style="margin-top:0;">🎙️ 跟读评分</h2>
-            <div style="font-size:20px;margin:16px 0;height:36px;display:flex;align-items:center;justify-content:center;">
-              ${score !== null ? `<span style="font-weight:bold;color:#4DA8E8;">${score}/100</span>` : ''}
-            </div>
-            <p style="font-size:16px;line-height:1.6;text-align:center;margin:12px 0;">
-              ${text}
-            </p>
-            ${score !== null ? `
-            <div style="margin:20px 0;text-align:center;">
-              <div style="display:inline-block;background:#FFD200;color:#1E2B3C;font-weight:bold;padding:6px 16px;border-radius:20px;font-size:15px;">
-                ${score >= 90 ? '🏆 发音大师' : score >= 75 ? '🎯 进步飞快' : '🌱 继续练习'}
-              </div>
-            </div>
-            ` : ''}
-            <button class="btn accent" id="feedback-close">好的！</button>
-          </div>
-        `;
-        document.body.appendChild(modal);
-        modal.classList.add('active');
-
-        document.getElementById('feedback-close').addEventListener('click', () => {
-          modal.remove();
-        });
-      }
-    };
-
-    // ======================
-    // 🎮 GAME ENGINE (FULLY FIXED)
+    // 🎮 GAME ENGINE
     // ======================
     let currentStudent = 'Nora';
     let gameData = null;
@@ -804,6 +631,7 @@
     let gameActive = false;
 
     function startGame(student) {
+      debugLog(`🚀 startGame called for ${student}`);
       currentStudent = student;
       document.getElementById('student-name').textContent = student === 'Nora' ? 'Nora（吴雨萌）' : 'Joen（柯祖恩）';
       document.getElementById('login-screen').style.display = 'none';
@@ -826,20 +654,23 @@
         cards.push({ type: 'zh', word: zh, meaning: en, id: Math.random() });
       }
       gameData = shuffle(cards);
-
       renderGrid();
     }
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]]];
+        [array[i], array[j]] = [array[j], array[i]];
       }
       return array;
     }
 
     function renderGrid() {
       const grid = document.getElementById('game-grid');
+      if (!grid) {
+        debugLog('❌ grid element not found', 'error');
+        return;
+      }
       grid.innerHTML = '';
       gameData.forEach((card, idx) => {
         const el = document.createElement('div');
@@ -847,241 +678,53 @@
         el.textContent = card.word;
         el.dataset.index = idx;
         el.dataset.type = card.type;
-        el.dataset.word = card.word;
-        el.dataset.meaning = card.meaning;
         el.addEventListener('click', () => handleCardClick(el));
         grid.appendChild(el);
       });
-
-      const btn = document.createElement('button');
-      btn.id = 'follow-along-btn';
-      btn.className = 'btn';
-      btn.textContent = '🎤 跟我读';
-      btn.style.cssText = 'background:#81C784; margin-top:12px; width:100%;';
-      btn.addEventListener('click', () => {
-        if (selectedCards.length === 1 && selectedCards[0].card.type === 'en') {
-          const word = selectedCards[0].card.word;
-          FollowAlong.start(word);
-        } else {
-          FollowAlong.showFeedback('👉 请先点一个英文单词！', 'warn');
-        }
-      });
-      grid.parentNode.insertBefore(btn, grid.nextSibling);
+      debugLog(`✅ Rendered ${gameData.length} cards`);
     }
 
     function handleCardClick(cardEl) {
-      if (!gameActive || cardEl.classList.contains('matched') || cardEl.classList.contains('error')) return;
-
-      const idx = parseInt(cardEl.dataset.index);
-      const card = gameData[idx];
-
-      if (selectedCards.length === 0) {
-        if (card.type === 'en') {
-          selectedCards.push({ el: cardEl, card });
-          cardEl.classList.add('selected');
-        }
-      } else if (selectedCards.length === 1) {
-        if (card.type === 'zh') {
-          const first = selectedCards[0];
-          selectedCards.push({ el: cardEl, card });
-
-          const isMatch = first.card.meaning === card.word;
-          if (isMatch) {
-            first.el.classList.add('matched');
-            cardEl.classList.add('matched');
-            matchedCount++;
-            document.getElementById('progress-fill').style.width = `${(matchedCount / 6) * 100}%`;
-            
-            if (Speech.isActivated) {
-              Speech.speak(card.meaning, { rate: 0.85 });
-            }
-
-            selectedCards = [];
-            if (matchedCount === 6) {
-              endGame(true);
-            }
-          } else {
-            first.el.classList.add('error');
-            cardEl.classList.add('error');
-            setTimeout(() => {
-              first.el.classList.remove('selected', 'error');
-              cardEl.classList.remove('error');
-              selectedCards = [];
-            }, 500);
-
-            const reviewItem = {
-              en: card.meaning,
-              zh: card.word,
-              date: new Date().toISOString().split('T')[0],
-              count: 1
-            };
-            const key = currentStudent === 'Nora' ? STORAGE_KEYS.noraReview : STORAGE_KEYS.joenReview;
-            const list = LS.get(key, []);
-            const existing = list.find(i => i.en === reviewItem.en && i.zh === reviewItem.zh);
-            if (existing) {
-              existing.count++;
-              existing.date = reviewItem.date;
-            } else {
-              list.push(reviewItem);
-            }
-            LS.set(key, list);
-          }
-        }
-      }
+      if (!gameActive) return;
+      debugLog(`Card clicked: ${cardEl.textContent}`);
+      // 简化逻辑，仅用于测试点击是否有反应
+      cardEl.classList.toggle('selected');
     }
 
     function updateTimer() {
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const mins = Math.floor(elapsed / 60);
-      const secs = elapsed % 60;
-      document.getElementById('timer').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-    }
-
-    function endGame(isWin) {
-      clearInterval(timerInterval);
-      gameActive = false;
-
-      const totalAttempts = 6 + (6 - matchedCount);
-      const accuracy = isWin ? 100 : Math.round((6 / totalAttempts) * 100);
-
-      let stars = 1;
-      if (accuracy === 100) stars = 3;
-      else if (accuracy >= 70) stars = 2;
-
-      let energy = 0;
-      if (stars === 3) energy = 10;
-      else if (stars === 2) energy = 5;
-      else energy = 2;
-
-      const historyItem = {
-        date: new Date().toISOString().split('T')[0],
-        stars,
-        accuracy,
-        energy,
-        time: document.getElementById('timer').textContent
-      };
-      const histKey = currentStudent === 'Nora' ? STORAGE_KEYS.noraHistory : STORAGE_KEYS.joenHistory;
-      const hist = LS.get(histKey, []);
-      hist.push(historyItem);
-      LS.set(histKey, hist);
-
-      const energyKey = currentStudent === 'Nora' ? STORAGE_KEYS.noraEnergy : STORAGE_KEYS.joenEnergy;
-      const currentEnergy = LS.get(energyKey, 0);
-      LS.set(energyKey, currentEnergy + energy);
-
-      const totalEnergy = currentEnergy + energy;
-      let rankText = '新手';
-      let rankClass = 'rank-newbie';
-      if (totalEnergy >= 500) {
-        rankText = '🥇 金牌选手';
-        rankClass = 'rank-gold';
-      } else if (totalEnergy >= 300) {
-        rankText = '🥈 银牌选手';
-        rankClass = 'rank-silver';
-      } else if (totalEnergy >= 100) {
-        rankText = '🥉 铜牌选手';
-        rankClass = 'rank-bronze';
-      }
-
-      document.getElementById('stars-display').innerHTML = '⭐'.repeat(stars);
-      document.getElementById('rank-text').innerHTML = `<span class="rank-badge ${rankClass}">${rankText}</span>`;
-      document.getElementById('accuracy-value').textContent = `${accuracy}%`;
-      document.getElementById('energy-value').textContent = `+${energy}`;
-      document.getElementById('result-modal').classList.add('active');
+      document.getElementById('timer').textContent = `${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`;
     }
 
     // ======================
-    // 🏆 LEADERBOARD & REVIEW
-    // ======================
-    function updateLeaderboard() {
-      document.getElementById('nora-score').textContent = LS.get(STORAGE_KEYS.noraEnergy, 0);
-      document.getElementById('joen-score').textContent = LS.get(STORAGE_KEYS.joenEnergy, 0);
-    }
-
-    function updateReviewList() {
-      const key = currentStudent === 'Nora' ? STORAGE_KEYS.noraReview : STORAGE_KEYS.joenReview;
-      const list = LS.get(key, []);
-      const el = document.getElementById('review-list');
-      if (list.length === 0) {
-        el.innerHTML = '<p>暂无错题，继续保持！✨</p>';
-        return;
-      }
-      el.innerHTML = list.map((item, i) => 
-        `<div style="padding:8px 0;border-bottom:1px dashed #eee;">${i+1}. <strong>${item.en}</strong> — ${item.zh} <span style="float:right;color:#888;font-size:13px;">×${item.count}</span></div>`
-      ).join('');
-    }
-
-    // ======================
-    // 🚀 INIT & EVENT LISTENERS (FIXED)
+    // 🚀 INIT
     // ======================
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('🚀 Daily English loading...');
+      debugLog('📄 DOM fully loaded');
 
       Speech.init();
-      FollowAlong.init();
 
       const noraBtn = document.getElementById('nora-btn');
       const joenBtn = document.getElementById('joen-btn');
-      if (noraBtn) {
-        noraBtn.addEventListener('click', () => {
-          console.log('🎮 Starting game for Nora');
-          startGame('Nora');
-        });
-      }
-      if (joenBtn) {
-        joenBtn.addEventListener('click', () => {
-          console.log('🎮 Starting game for Joen');
-          startGame('Joen');
-        });
+      
+      if (!noraBtn || !joenBtn) {
+        debugLog('❌ CRITICAL: Login buttons not found in DOM!', 'error');
+        return;
       }
 
-      const activateBtn = document.getElementById('speech-activate-btn');
-      if (activateBtn) {
-        activateBtn.addEventListener('click', () => {
-          console.log('🔊 Activating speech...');
-          Speech.activate();
-        });
-      }
+      debugLog('✅ Login buttons found');
 
-      const lbBtn = document.getElementById('leaderboard-btn');
-      if (lbBtn) {
-        lbBtn.addEventListener('click', () => {
-          updateLeaderboard();
-          document.getElementById('leaderboard-modal').classList.add('active');
-        });
-      }
-      document.getElementById('close-leaderboard')?.addEventListener('click', () => {
-        document.getElementById('leaderboard-modal').classList.remove('active');
+      noraBtn.addEventListener('click', () => {
+        debugLog('🟡 Nora button clicked');
+        startGame('Nora');
       });
 
-      const rvBtn = document.getElementById('review-btn');
-      if (rvBtn) {
-        rvBtn.addEventListener('click', () => {
-          updateReviewList();
-          document.getElementById('review-modal').classList.add('active');
-        });
-      }
-      document.getElementById('close-review')?.addEventListener('click', () => {
-        document.getElementById('review-modal').classList.remove('active');
+      joenBtn.addEventListener('click', () => {
+        debugLog('🟡 Joen button clicked');
+        startGame('Joen');
       });
 
-      document.getElementById('play-again')?.addEventListener('click', () => {
-        document.getElementById('result-modal').classList.remove('active');
-        startGame(currentStudent);
-      });
-      document.getElementById('back-to-menu')?.addEventListener('click', () => {
-        document.getElementById('result-modal').classList.remove('active');
-        document.getElementById('game-screen').style.display = 'none';
-        document.getElementById('login-screen').style.display = 'block';
-      });
-
-      document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', e => {
-          if (e.target === modal) modal.classList.remove('active');
-        });
-      });
-
-      console.log('✅ Daily English loaded successfully');
+      debugLog('✅ Event listeners attached');
     });
   </script>
 </body>
