@@ -1,27 +1,50 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Daily English 极简测试</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="📘 Daily English｜三年级Join In单词消消乐｜Nora & Joen专属英语复习工具" />
+  <title>📘 Daily English</title>
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkRhaWx5IEVuZ2xpc2giLAogICJzaG9ydF9uYW1lIjogIkRhaWx5IEVuZ2xpc2giLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiM0RkExRTEiLAogICJ0aGVtZV9jb2xvciI6ICIjNERBOEU4Igp9" />
   <style>
+    :root {
+      --primary: #4DA8E8;
+      --accent: #FFD200;
+      --bg: #FFFFFF;
+      --text: #1E2B3C;
+      --card-bg-en: #E6F4FF;
+      --card-bg-zh: #FFF8E6;
+      --success: #4CAF50;
+      --error: #F44336;
+      --shadow: 0 3px 12px rgba(0,0,0,0.08);
+      --radius: 16px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
     body {
-      font-family: sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #F8FAFC 0%, #E6F4FF 100%);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      background: #f0f4f8;
+      padding: 16px;
     }
     .screen {
+      width: 100%;
+      max-width: 420px;
       text-align: center;
-      padding: 40px;
+    }
+    .card-container {
       background: white;
       border-radius: 24px;
+      padding: 28px 20px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      width: 300px;
     }
+    h1 { font-size: 24px; color: var(--primary); margin-bottom: 8px; }
+    h2 { font-size: 20px; color: var(--primary); margin-bottom: 16px; }
+    .subtitle { color: #555; margin-bottom: 24px; font-size: 16px; }
     .btn {
       display: block;
       width: 100%;
@@ -32,60 +55,411 @@
       font-size: 18px;
       font-weight: bold;
       cursor: pointer;
-      background: #FFD200;
-      color: #1E2B3C;
+      background: var(--accent);
+      color: var(--text);
+      box-shadow: 0 4px 12px rgba(255,210,0,0.35);
+      transition: all 0.2s;
     }
     .btn:active { transform: scale(0.96); }
-    h2 { margin-bottom: 8px; color: #4DA8E8; }
-    p { margin: 16px 0; color: #555; }
+    .btn.small { padding: 10px 20px; font-size: 15px; display: inline-block; width: auto; margin: 6px; }
+    .btn.blue { background: var(--primary); color: white; }
+    .btn.green { background: #81C784; color: white; }
+    .btn.secondary { background: white; color: var(--text); border: 2px solid #ddd; box-shadow: none; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 16px 0;
+    }
+    @media (min-width: 480px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+    .card {
+      aspect-ratio: 4/3;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 6px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      background: white;
+      color: var(--text);
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .card.en { background: var(--card-bg-en); color: #2962FF; }
+    .card.zh { background: var(--card-bg-zh); color: #E65100; }
+    .card.selected { transform: scale(0.9); box-shadow: 0 0 0 3px var(--primary); }
+    .card.matched { opacity: 0.3; transform: scale(0.8); background: var(--success) !important; color: white !important; pointer-events: none; }
+    .card.error { animation: shake 0.5s; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+    }
+    .info-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0;
+      font-size: 14px;
+      color: #666;
+    }
+    .progress-bar {
+      height: 6px;
+      background: #E0E7FF;
+      border-radius: 3px;
+      overflow: hidden;
+      flex: 1;
+      margin: 0 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.4s;
+    }
+    .speech-hint {
+      background: #FFF3CD;
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 10px 16px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .speech-hint button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 24px;
+      padding: 28px 20px;
+      width: 90%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .stars { font-size: 36px; margin: 12px 0; }
+    .stats { display: flex; justify-content: space-around; margin: 16px 0; }
+    .stat-value { font-size: 22px; font-weight: 700; color: var(--primary); }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
   <!-- 登录界面 -->
   <div id="loginScreen" class="screen">
-    <h2>📘 Daily English</h2>
-    <p>请选择你的名字</p>
-    <button class="btn" id="btnNora">Nora（吴雨萌）</button>
-    <button class="btn" id="btnJoen">Joen（柯祖恩）</button>
-    <p style="font-size:12px; color:#999;">测试：点击按钮应切换到游戏界面</p>
+    <div class="card-container">
+      <h1>📘 Daily English</h1>
+      <p class="subtitle">请选择你的名字开始复习</p>
+      <button class="btn" id="btnNora">Nora（吴雨萌）</button>
+      <button class="btn" id="btnJoen">Joen（柯祖恩）</button>
+      <p style="font-size:13px;color:#999;margin-top:16px;">你们一起在战斗！💪</p>
+    </div>
   </div>
 
-  <!-- 游戏界面（默认隐藏） -->
-  <div id="gameScreen" class="screen" style="display:none;">
-    <h2>🎮 游戏界面</h2>
-    <p>当前学生：<strong id="studentName"></strong></p>
-    <p style="font-size:14px; color:#999;">如果看到此界面，说明切换成功！</p>
-    <button class="btn" onclick="location.reload()">返回登录页</button>
+  <!-- 游戏界面 -->
+  <div id="gameScreen" class="screen hidden">
+    <div class="card-container">
+      <h1>📘 Daily English</h1>
+      <h2 id="studentName">Nora（吴雨萌）</h2>
+
+      <div class="speech-hint" id="speechHint">
+        🔊 点击激活单词朗读
+        <button id="btnActivate">激活</button>
+      </div>
+
+      <div class="info-bar">
+        <span>⏱ <span id="timer">00:00</span></span>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <span>✅ <span id="matchCount">0/6</span></span>
+      </div>
+
+      <div class="grid" id="gameGrid"></div>
+
+      <p style="font-size:13px;color:#666;">💡 点一个英文词 → 再点一个中文词</p>
+
+      <button class="btn small blue" id="btnLeaderboard">🏆 排行榜</button>
+      <button class="btn small green" id="btnReview">📝 错题本</button>
+      <button class="btn secondary small" id="btnBackMenu">返回选人</button>
+    </div>
+  </div>
+
+  <!-- 排行榜弹窗 -->
+  <div id="leaderboardModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>🏆 学习排行榜</h2>
+      <div style="margin:16px 0;">
+        <p><strong>Nora（吴雨萌）</strong>：<span id="noraScore">0</span> ⚡</p>
+        <p><strong>Joen（柯祖恩）</strong>：<span id="joenScore">0</span> ⚡</p>
+      </div>
+      <p style="color:#999;">你们一起在战斗！💪</p>
+      <button class="btn small btn" onclick="document.getElementById('leaderboardModal').classList.add('hidden')">关闭</button>
+    </div>
+  </div>
+
+  <!-- 错题本弹窗 -->
+  <div id="reviewModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>📝 错题本</h2>
+      <div id="reviewList" style="text-align:left;margin:16px 0;max-height:300px;overflow-y:auto;"></div>
+      <button class="btn small btn" onclick="document.getElementById('reviewModal').classList.add('hidden')">关闭</button>
+    </div>
+  </div>
+
+  <!-- 结果弹窗 -->
+  <div id="resultModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>🎉 复习完成！</h2>
+      <div class="stars" id="starsDisplay">⭐⭐⭐</div>
+      <p id="rankText" style="font-weight:600;"></p>
+      <div class="stats">
+        <div>正确率<br><span class="stat-value" id="accuracyValue">100%</span></div>
+        <div>获得<br><span class="stat-value" id="energyValue">+10</span> ⚡</div>
+      </div>
+      <p style="font-size:13px;color:#666;">错题已存入「错题本」</p>
+      <button class="btn" id="btnPlayAgain">再玩一局</button>
+      <button class="btn secondary small" id="btnResultClose">关闭</button>
+    </div>
   </div>
 
   <script>
-    // 等待页面加载完成后绑定事件
-    document.addEventListener('DOMContentLoaded', function() {
-      var btnNora = document.getElementById('btnNora');
-      var btnJoen = document.getElementById('btnJoen');
-      var loginScreen = document.getElementById('loginScreen');
-      var gameScreen = document.getElementById('gameScreen');
-      var studentName = document.getElementById('studentName');
+    // =====================
+    // 词库 & 存储
+    // =====================
+    const VOCAB = [
+      ['hello','你好'],['goodbye','再见'],['hi','嗨'],['bye','拜拜'],
+      ['good morning','早上好'],['good afternoon','下午好'],['good evening','晚上好'],['good night','晚安'],
+      ['one','一'],['two','二'],['three','三'],['four','四'],['five','五'],
+      ['six','六'],['seven','七'],['eight','八'],['nine','九'],['ten','十'],
+      ['red','红色'],['blue','蓝色'],['yellow','黄色'],['green','绿色'],
+      ['orange','橙色'],['purple','紫色'],['pink','粉色'],['white','白色'],
+      ['black','黑色'],['brown','棕色'],['what','什么'],['your','你的'],
+      ['name','名字'],['my','我的'],['is','是'],['I','我'],['am','是'],
+      ['how','怎样'],['are','是'],['you','你'],['fine','好的'],
+      ['thank','谢谢'],['thanks','多谢'],['please','请'],['sorry','对不起'],
+      ['yes','是'],['no','不'],['number','数字'],['colour','颜色']
+    ];
 
-      if (btnNora && btnJoen) {
-        btnNora.onclick = function() {
-          studentName.textContent = 'Nora（吴雨萌）';
-          loginScreen.style.display = 'none';
-          gameScreen.style.display = 'block';
-        };
-        btnJoen.onclick = function() {
-          studentName.textContent = 'Joen（柯祖恩）';
-          loginScreen.style.display = 'none';
-          gameScreen.style.display = 'block';
-        };
-        // 在页面角落显示一个绿色圆点，表示脚本执行成功
-        var dot = document.createElement('div');
-        dot.style.cssText = 'position:fixed;top:10px;right:10px;width:12px;height:12px;border-radius:6px;background:#34C759;z-index:9999;';
-        document.body.appendChild(dot);
-      } else {
-        alert('致命错误：按钮元素未找到，请检查HTML。');
+    const LS = {
+      get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { return d; } },
+      set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+    };
+
+    // =====================
+    // 语音模块
+    // =====================
+    let speechActivated = false;
+    function activateSpeech() {
+      if (speechActivated) return;
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance('');
+        u.volume = 0;
+        window.speechSynthesis.speak(u);
+        speechActivated = true;
+        document.getElementById('speechHint').classList.add('hidden');
       }
+    }
+    function speak(word) {
+      if (!speechActivated || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(word);
+      u.lang = 'en-GB';
+      u.rate = 0.85;
+      window.speechSynthesis.speak(u);
+    }
+
+    // =====================
+    // 游戏逻辑
+    // =====================
+    let student, cards, selected, matched, timerSec, timerId, attempts;
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startGame(name) {
+      student = name;
+      document.getElementById('studentName').textContent = name === 'Nora' ? 'Nora（吴雨萌）' : 'Joen（柯祖恩）';
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('gameScreen').classList.remove('hidden');
+      document.getElementById('resultModal').classList.add('hidden');
+
+      selected = [];
+      matched = 0;
+      attempts = 0;
+      timerSec = 0;
+      clearInterval(timerId);
+      document.getElementById('timer').textContent = '00:00';
+      document.getElementById('matchCount').textContent = '0/6';
+      document.getElementById('progressFill').style.width = '0%';
+
+      timerId = setInterval(() => {
+        timerSec++;
+        const m = Math.floor(timerSec / 60);
+        const s = timerSec % 60;
+        document.getElementById('timer').textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+      }, 1000);
+
+      const words = shuffle([...VOCAB]).slice(0, 6);
+      cards = [];
+      words.forEach(([en, zh]) => {
+        cards.push({ type: 'en', text: en, pair: zh });
+        cards.push({ type: 'zh', text: zh, pair: en });
+      });
+      shuffle(cards);
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('gameGrid');
+      grid.innerHTML = '';
+      cards.forEach((card, i) => {
+        const el = document.createElement('div');
+        el.className = `card ${card.type}`;
+        el.textContent = card.text;
+        el.dataset.index = i;
+        el.onclick = () => clickCard(i, el);
+        grid.appendChild(el);
+      });
+    }
+
+    function clickCard(index, el) {
+      if (el.classList.contains('matched')) return;
+
+      // 选择第一个卡片
+      if (selected.length === 0) {
+        if (cards[index].type === 'en') {
+          selected.push({ index, el });
+          el.classList.add('selected');
+        }
+        return;
+      }
+
+      // 选择第二个卡片
+      if (selected.length === 1 && cards[index].type === 'zh') {
+        const first = selected[0];
+        const second = { index, el };
+        el.classList.add('selected');
+        attempts++;
+
+        if (cards[first.index].pair === cards[second.index].text) {
+          // 配对成功
+          first.el.classList.remove('selected');
+          second.el.classList.remove('selected');
+          first.el.classList.add('matched');
+          second.el.classList.add('matched');
+          matched++;
+          document.getElementById('matchCount').textContent = `${matched}/6`;
+          document.getElementById('progressFill').style.width = `${(matched / 6) * 100}%`;
+          speak(cards[first.index].text);
+          selected = [];
+
+          if (matched === 6) endGame();
+        } else {
+          // 配对失败
+          first.el.classList.add('error');
+          second.el.classList.add('error');
+          setTimeout(() => {
+            first.el.classList.remove('selected', 'error');
+            second.el.classList.remove('selected', 'error');
+          }, 500);
+          selected = [];
+
+          // 记录错词
+          const wrongEn = cards[first.index].type === 'en' ? cards[first.index].text : cards[second.index].text;
+          const wrongZh = cards[first.index].type === 'zh' ? cards[first.index].text : cards[second.index].text;
+          const key = `daily_${student}_review`;
+          const list = LS.get(key, []);
+          const exist = list.find(w => w.en === wrongEn);
+          if (exist) { exist.count++; } else { list.push({ en: wrongEn, zh: wrongZh, count: 1, date: new Date().toISOString().split('T')[0] }); }
+          LS.set(key, list);
+        }
+      }
+    }
+
+    function endGame() {
+      clearInterval(timerId);
+      const accuracy = matched / attempts;
+      let stars = 1;
+      if (accuracy >= 1.0) stars = 3;
+      else if (accuracy >= 0.7) stars = 2;
+      let energy = stars === 3 ? 10 : stars === 2 ? 5 : 2;
+
+      // 更新总能量
+      const energyKey = `daily_${student}_energy`;
+      const total = LS.get(energyKey, 0) + energy;
+      LS.set(energyKey, total);
+
+      // 显示结果
+      document.getElementById('starsDisplay').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+      document.getElementById('accuracyValue').textContent = Math.round(accuracy * 100) + '%';
+      document.getElementById('energyValue').textContent = '+' + energy;
+      document.getElementById('rankText').textContent = total >= 500 ? '🥇 金牌选手' : total >= 300 ? '🥈 银牌选手' : total >= 100 ? '🥉 铜牌选手' : '🌱 继续加油';
+      document.getElementById('resultModal').classList.remove('hidden');
+    }
+
+    function showLeaderboard() {
+      document.getElementById('noraScore').textContent = LS.get('daily_Nora_energy', 0);
+      document.getElementById('joenScore').textContent = LS.get('daily_Joen_energy', 0);
+      document.getElementById('leaderboardModal').classList.remove('hidden');
+    }
+
+    function showReview() {
+      const list = LS.get(`daily_${student}_review`, []);
+      const el = document.getElementById('reviewList');
+      el.innerHTML = list.length === 0 ? '<p>暂无错题，继续保持！✨</p>' : list.map((w, i) => `<p>${i+1}. <strong>${w.en}</strong> — ${w.zh} (×${w.count})</p>`).join('');
+      document.getElementById('reviewModal').classList.remove('hidden');
+    }
+
+    // =====================
+    // 初始化
+    // =====================
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('btnNora').onclick = () => startGame('Nora');
+      document.getElementById('btnJoen').onclick = () => startGame('Joen');
+      document.getElementById('btnActivate').onclick = activateSpeech;
+      document.getElementById('btnLeaderboard').onclick = showLeaderboard;
+      document.getElementById('btnReview').onclick = showReview;
+      document.getElementById('btnBackMenu').onclick = () => {
+        clearInterval(timerId);
+        document.getElementById('gameScreen').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
+      };
+      document.getElementById('btnPlayAgain').onclick = () => {
+        document.getElementById('resultModal').classList.add('hidden');
+        startGame(student);
+      };
+      document.getElementById('btnResultClose').onclick = () => {
+        document.getElementById('resultModal').classList.add('hidden');
+        document.getElementById('gameScreen').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
+      };
     });
   </script>
 </body>
