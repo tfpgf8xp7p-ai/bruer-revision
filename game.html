@@ -842,6 +842,264 @@
         e.preventDefault();
       });
     });
+    <!-- === 🎤 FOLLOW-ALONG SCORING MODULE (Web Speech Recognition) === -->
+<script>
+// 🔑 Global FollowAlong object
+const FollowAlong = {
+  recognition: null,
+  isListening: false,
+  currentWord: '',
+  startTime: 0,
+  endTime: 0,
+  // Predefined phoneme patterns for key Join In words (simplified, child-focused)
+  phonemeMap: {
+    'hello': ['h', 'e', 'l', 'o'],
+    'hi': ['h', 'aɪ'],
+    'bye': ['b', 'aɪ'],
+    'goodbye': ['g', 'ʊ', 'd', 'b', 'aɪ'],
+    'red': ['r', 'ɛ', 'd'],
+    'blue': ['b', 'l', 'uː'],
+    'yellow': ['j', 'ɛ', 'l', 'oʊ'],
+    'green': ['g', 'r', 'iː', 'n'],
+    'one': ['w', 'ʌ', 'n'],
+    'two': ['t', 'uː'],
+    'three': ['θ', 'r', 'iː'],
+    'four': ['f', 'ɔːr'],
+    'five': ['f', 'aɪ', 'v'],
+    'six': ['s', 'ɪ', 'k', 's'],
+    'seven': ['s', 'ɛ', 'v', 'ə', 'n'],
+    'eight': ['eɪ', 't'],
+    'nine': ['n', 'aɪ', 'n'],
+    'ten': ['t', 'ɛ', 'n'],
+    'what': ['w', 'ɒ', 't'],
+    'name': ['n', 'eɪ', 'm'],
+    'my': ['m', 'aɪ'],
+    'is': ['ɪ', 'z'],
+    'I': ['aɪ'],
+    'am': ['æ', 'm'],
+    'how': ['h', 'aʊ'],
+    'are': ['ɑːr'],
+    'you': ['j', 'uː'],
+    'fine': ['f', 'aɪ', 'n'],
+    'thank': ['θ', 'æ', 'ŋ'],
+    'thanks': ['θ', 'æ', 'ŋ', 'k', 's'],
+    'please': ['p', 'l', 'iː', 'z'],
+    'sorry': ['s', 'ɒ', 'r', 'i'],
+    'yes': ['j', 'ɛ', 's'],
+    'no': ['n', 'əʊ'],
+    'number': ['n', 'ʌ', 'm', 'b', 'ə'],
+    'colour': ['k', 'ʌ', 'l', 'ə']
+  },
+
+  init() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      this.recognition = new SpeechRecognition();
+      this.recognition.continuous = false;
+      this.recognition.interimResults = false;
+      this.recognition.lang = 'en-GB';
+      this.recognition.maxAlternatives = 1;
+
+      this.recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.trim().toLowerCase();
+        this.endTime = Date.now();
+        this.scorePronunciation(transcript);
+      };
+
+      this.recognition.onerror = (event) => {
+        console.warn('🎤 Recognition error:', event.error);
+        this.showFeedback('⚠️ 请再试一次，或点击【听我读】听示范', 'warn');
+      };
+
+      this.recognition.onend = () => {
+        this.isListening = false;
+      };
+
+      console.log('✅ FollowAlong: SpeechRecognition available');
+    } else {
+      console.warn('❌ FollowAlong: SpeechRecognition NOT supported');
+      // Hide follow-along UI if unsupported
+      document.getElementById('follow-along-btn')?.remove();
+    }
+  },
+
+  start(word) {
+    if (!this.recognition || this.isListening) return;
+    this.currentWord = word.toLowerCase();
+    this.startTime = Date.now();
+    this.isListening = true;
+    try {
+      this.recognition.start();
+      this.showFeedback(`🎤 请大声读出：${word}！`, 'recording');
+      // Auto-stop after 3s if no speech
+      setTimeout(() => {
+        if (this.isListening && this.recognition) {
+          this.recognition.stop();
+          this.showFeedback('⏰ 时间到，请再试一次', 'warn');
+        }
+      }, 3000);
+    } catch (e) {
+      console.error('🎤 Start failed:', e);
+      this.showFeedback('❌ 无法启动麦克风，请检查权限', 'error');
+      this.isListening = false;
+    }
+  },
+
+  scorePronunciation(transcript) {
+    const word = this.currentWord;
+    const refPhonemes = this.phonemeMap[word] || [];
+    const userPhonemes = this.transcriptToPhonemes(transcript);
+
+    // ✅ Metrics
+    let clarity = 0; // % of correct phonemes
+    let durationScore = 0; // 0–100 based on speaking time vs ideal
+    let accuracy = 0; // Levenshtein-like edit distance
+
+    // 1. Clarity: count matched phonemes (order-insensitive)
+    if (refPhonemes.length > 0 && userPhonemes.length > 0) {
+      const matched = refPhonemes.filter(p => userPhonemes.some(up => this.similarPhoneme(p, up)));
+      clarity = Math.round((matched.length / refPhonemes.length) * 100);
+    }
+
+    // 2. Duration: ideal ~600ms per syllable (e.g., "hello"=2 syllables → 1200ms)
+    const idealMs = Math.max(800, refPhonemes.length * 400);
+    const actualMs = this.endTime - this.startTime;
+    durationScore = Math.max(0, Math.min(100, 100 - Math.abs(actualMs - idealMs) / 10));
+
+    // 3. Accuracy: simple string similarity (case-insensitive, ignore spaces/punct)
+    const cleanRef = word.replace(/[^a-z]/g, '');
+    const cleanUser = transcript.replace(/[^a-z]/g, '');
+    accuracy = this.stringSimilarity(cleanRef, cleanUser);
+
+    // 🔢 Final score (weighted)
+    const finalScore = Math.round(
+      clarity * 0.4 +
+      durationScore * 0.3 +
+      accuracy * 0.3
+    );
+
+    // 🌟 Star grade
+    let stars = '⭐';
+    if (finalScore >= 90) stars = '🌟';
+    else if (finalScore >= 75) stars = '✨';
+
+    // 🗣️ Encouraging feedback (Toby-style!)
+    const encouragements = [
+      `你把 ${word} 发得像 Toby 老师一样棒！`,
+      `太棒了！${word} 就是这样读的！`,
+      `发音清晰又自信，继续加油！`,
+      `Wow! ${word} 说得超标准～`,
+      `👍 你已经掌握 ${word} 的秘密发音啦！`
+    ];
+    const msg = `${stars} ${encouragements[Math.floor(Math.random() * encouragements.length)]}`;
+
+    this.showFeedback(msg, 'success', finalScore);
+  },
+
+  transcriptToPhonemes(transcript) {
+    // Simplified phoneme mapper — maps common mispronunciations to target sounds
+    const map = {
+      'hello': ['h', 'e', 'l', 'o'], 'hi': ['h', 'aɪ'], 'bye': ['b', 'aɪ'],
+      'red': ['r', 'ɛ', 'd'], 'blue': ['b', 'l', 'uː'], 'yellow': ['j', 'ɛ', 'l', 'oʊ'],
+      'one': ['w', 'ʌ', 'n'], 'two': ['t', 'uː'], 'three': ['θ', 'r', 'iː'],
+      'what': ['w', 'ɒ', 't'], 'name': ['n', 'eɪ', 'm'], 'my': ['m', 'aɪ'],
+      'is': ['ɪ', 'z'], 'i': ['aɪ'], 'am': ['æ', 'm'], 'how': ['h', 'aʊ'],
+      'are': ['ɑːr'], 'you': ['j', 'uː'], 'fine': ['f', 'aɪ', 'n'],
+      'thank': ['θ', 'æ', 'ŋ'], 'thanks': ['θ', 'æ', 'ŋ', 'k', 's'],
+      'please': ['p', 'l', 'iː', 'z'], 'sorry': ['s', 'ɒ', 'r', 'i'],
+      'yes': ['j', 'ɛ', 's'], 'no': ['n', 'əʊ'], 'number': ['n', 'ʌ', 'm', 'b', 'ə'],
+      'colour': ['k', 'ʌ', 'l', 'ə']
+    };
+    // Fallback: split by common consonants/vowels
+    return (map[transcript] || []).concat(
+      Array.from(transcript).filter(c => /[bcdfghjklmnpqrstvwxyz]/i.test(c)).map(c => c.toLowerCase())
+    );
+  },
+
+  similarPhoneme(a, b) {
+    // Rough phoneme similarity (e.g., 't'≈'d', 's'≈'z', 'k'≈'g')
+    const groups = [
+      ['t', 'd'], ['s', 'z'], ['k', 'g'], ['p', 'b'], ['f', 'v'], ['θ', 'ð'],
+      ['r', 'l'], ['j', 'y'], ['w', 'u'], ['i', 'ɪ', 'iː'], ['e', 'ɛ', 'eɪ'],
+      ['a', 'æ', 'ɑː', 'ʌ', 'ə'], ['o', 'ɔː', 'oʊ', 'əʊ'], ['u', 'uː', 'ʊ']
+    ];
+    return a === b || groups.some(g => g.includes(a) && g.includes(b));
+  },
+
+  stringSimilarity(a, b) {
+    const la = a.length, lb = b.length;
+    if (la === 0 && lb === 0) return 100;
+    if (la === 0 || lb === 0) return 0;
+    const d = [];
+    for (let i = 0; i <= la; i++) d[i] = [i];
+    for (let j = 0; j <= lb; j++) d[0][j] = j;
+    for (let i = 1; i <= la; i++) {
+      for (let j = 1; j <= lb; j++) {
+        d[i][j] = Math.min(
+          d[i-1][j] + 1,
+          d[i][j-1] + 1,
+          d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1)
+        );
+      }
+    }
+    return Math.round(100 - (d[la][lb] / Math.max(la, lb)) * 100);
+  },
+
+  showFeedback(text, type, score = null) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width:360px;padding:20px;">
+        <h2 style="margin-top:0;">🎙️ 跟读评分</h2>
+        <div style="font-size:20px;margin:16px 0;height:36px;display:flex;align-items:center;justify-content:center;">
+          ${score !== null ? `<span style="font-weight:bold;color:#4DA8E8;">${score}/100</span>` : ''}
+        </div>
+        <p style="font-size:16px;line-height:1.6;text-align:center;margin:12px 0;">
+          ${text}
+        </p>
+        ${score !== null ? `
+        <div style="margin:20px 0;text-align:center;">
+          <div style="display:inline-block;background:#FFD200;color:#1E2B3C;font-weight:bold;padding:6px 16px;border-radius:20px;font-size:15px;">
+            ${score >= 90 ? '🏆 发音大师' : score >= 75 ? '🎯 进步飞快' : '🌱 继续练习'}
+          </div>
+        </div>
+        ` : ''}
+        <button class="btn accent" id="feedback-close">好的！</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.classList.add('active');
+
+    document.getElementById('feedback-close').addEventListener('click', () => {
+      modal.remove();
+    });
+  }
+};
+
+// ✅ Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+  FollowAlong.init();
+
+  // 🔔 Add "Follow Along" button to game UI (after grid)
+  const gameGrid = document.getElementById('game-grid');
+  if (gameGrid) {
+    const btn = document.createElement('button');
+    btn.id = 'follow-along-btn';
+    btn.className = 'btn';
+    btn.textContent = '🎤 跟我读';
+    btn.style.cssText = 'background:#81C784; margin-top:12px; width:100%;';
+    btn.addEventListener('click', () => {
+      if (selectedCards.length === 1 && selectedCards[0].card.type === 'en') {
+        const word = selectedCards[0].card.word;
+        FollowAlong.start(word);
+      } else {
+        FollowAlong.showFeedback('👉 请先点一个英文单词！', 'warn');
+      }
+    });
+    gameGrid.parentNode.insertBefore(btn, gameGrid.nextSibling);
+  }
+});
+</script>
   </script>
 </body>
 </html>
