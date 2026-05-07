@@ -1,730 +1,91 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="description" content="📘 Daily English｜三年级Join In单词消消乐｜Nora & Joen专属英语复习工具" />
-  <title>📘 Daily English</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Daily English 极简测试</title>
   <style>
-    :root {
-      --primary: #4DA8E8;
-      --accent: #FFD200;
-      --bg: #FFFFFF;
-      --text: #1E2B3C;
-      --card-bg-en: #E6F4FF;
-      --card-bg-zh: #FFF8E6;
-      --success: #4CAF50;
-      --error: #F44336;
-      --shadow: 0 3px 12px rgba(0,0,0,0.08);
-      --radius: 16px;
-      --gap: 12px;
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-    }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: linear-gradient(135deg, #F8FAFC 0%, #E6F4FF 100%);
-      color: var(--text);
-      line-height: 1.5;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       min-height: 100vh;
-      overflow-x: hidden;
-      text-rendering: optimizeLegibility;
-      position: relative;
+      margin: 0;
+      background: #f0f4f8;
     }
-    .debug-panel {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .debug-btn {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 50px;
-      padding: 8px 16px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .debug-output {
-      display: none;
-      position: fixed;
-      bottom: 70px;
-      left: 0;
-      right: 0;
-      max-height: 200px;
-      overflow-y: auto;
-      background: rgba(30, 43, 60, 0.95);
-      color: #0f0;
-      padding: 12px;
-      font-family: monospace;
-      font-size: 13px;
-      white-space: pre-wrap;
-      word-break: break-all;
-      z-index: 9998;
-      border-radius: 12px 12px 0 0;
-      margin: 0 12px;
-    }
-    .container {
-      max-width: 420px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    h1 {
-      font-size: 24px;
-      font-weight: 700;
+    .screen {
       text-align: center;
-      margin: 12px 0 20px;
-      color: var(--primary);
-      letter-spacing: -0.5px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .logo-icon {
-      font-size: 26px;
-      color: var(--accent);
-    }
-    .student-info {
-      text-align: center;
-      font-weight: 600;
-      margin: 8px 0;
-      font-size: 17px;
-      color: var(--primary);
-    }
-    .timer-progress {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 12px 0;
-      font-size: 14px;
-      color: #666;
-    }
-    .progress-bar {
-      height: 6px;
-      background: #E0E7FF;
-      border-radius: 3px;
-      overflow: hidden;
-      flex: 1;
-      margin: 0 12px;
-    }
-    .progress-fill {
-      height: 100%;
-      background: var(--primary);
-      border-radius: 3px;
-      width: 0%;
-      transition: width 0.4s ease;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--gap);
-      margin: 20px 0;
-    }
-    @media (min-width: 480px) {
-      .grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-    .card {
-      aspect-ratio: 4/3;
-      border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 18px;
-      padding: 8px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
+      padding: 40px;
       background: white;
-      color: var(--text);
-      text-align: center;
-      line-height: 1.3;
-      user-select: none;
-      transform: scale(1);
-    }
-    .card.en {
-      background: var(--card-bg-en);
-      color: #2962FF;
-    }
-    .card.zh {
-      background: var(--card-bg-zh);
-      color: #E65100;
-    }
-    .card.selected {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 3px var(--primary), 0 4px 12px rgba(77, 168, 232, 0.3);
-    }
-    .card.matched {
-      opacity: 0.3;
-      transform: scale(0.85);
-      background: var(--success);
-      color: white !important;
-      animation: fadeOut 0.5s forwards;
-    }
-    .card.error {
-      animation: shake 0.5s ease-in-out;
-    }
-    @keyframes fadeOut {
-      to { opacity: 0; transform: scale(0.7); }
-    }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      50% { transform: translateX(5px); }
-      75% { transform: translateX(-5px); }
+      border-radius: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      width: 300px;
     }
     .btn {
-      display: inline-block;
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 14px 24px;
-      font-size: 17px;
-      font-weight: 600;
-      border-radius: 50px;
-      cursor: pointer;
-      margin: 8px 4px;
-      transition: all 0.2s;
-      box-shadow: 0 3px 8px rgba(77, 168, 232, 0.3);
-      letter-spacing: 0.5px;
-    }
-    .btn:hover {
-      background: #3a8fd9;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(77, 168, 232, 0.4);
-    }
-    .btn.accent {
-      background: var(--accent);
-      color: var(--text);
-    }
-    .btn.accent:hover {
-      background: #e6be00;
-    }
-    .btn:active {
-      transform: translateY(0);
-    }
-    .instructions {
-      text-align: center;
-      font-size: 14px;
-      color: #666;
-      margin-top: 24px;
-      padding: 12px;
-      background: white;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
+      display: block;
       width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-    .modal.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    .modal-content {
-      background: white;
-      border-radius: var(--radius);
-      width: 90%;
-      max-width: 400px;
-      padding: 24px;
-      text-align: center;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.2);
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
-      position: relative;
-      animation: popIn 0.35s forwards;
-    }
-    @keyframes popIn {
-      to { transform: scale(1); }
-    }
-    .modal h2 {
-      font-size: 22px;
-      margin-bottom: 16px;
-      color: var(--primary);
-    }
-    .stars {
-      font-size: 32px;
-      margin: 16px 0;
-      height: 40px;
-      display: flex;
-      justify-content: center;
-      gap: 4px;
-    }
-    .star {
-      color: #FFC107;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-    .stats {
-      display: flex;
-      justify-content: space-around;
-      margin: 20px 0;
-      font-size: 15px;
-      color: #333;
-    }
-    .stat-item {
-      text-align: center;
-    }
-    .stat-value {
-      font-weight: 700;
-      font-size: 20px;
-      color: var(--primary);
-    }
-    .rank-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 8px;
-      background: #E3F2FD;
-      color: #1976D2;
-    }
-    .rank-gold { background: #FFF3CD; color: #E65100; }
-    .rank-silver { background: #ECEFF1; color: #455A64; }
-    .rank-bronze { background: #FFE0B2; color: #EF6C00; }
-    .rank-newbie { background: #E8F5E9; color: #2E7D32; }
-    .leaderboard {
-      margin-top: 24px;
-      background: white;
-      border-radius: var(--radius);
       padding: 16px;
-      box-shadow: var(--shadow);
+      margin: 12px 0;
+      border: none;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #FFD200;
+      color: #1E2B3C;
     }
-    .leaderboard h3 {
-      text-align: center;
-      margin-bottom: 16px;
-      color: var(--primary);
-    }
-    .player-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px dashed #EEE;
-    }
-    .player-row:last-child {
-      border-bottom: none;
-    }
-    .player-name {
-      font-weight: 600;
-      color: #333;
-    }
-    .player-score {
-      font-weight: 700;
-      color: var(--primary);
-    }
-    .footer-note {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 13px;
-      color: #777;
-      font-style: italic;
-    }
-    /* Login Screen */
-    .login-screen {
-      text-align: center;
-      padding: 40px 20px;
-    }
-    .login-title {
-      font-size: 26px;
-      margin-bottom: 32px;
-      color: var(--primary);
-    }
-    .login-btns {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    /* Responsive tweaks */
-    @media (max-width: 420px) {
-      .container { padding: 12px; }
-      h1 { font-size: 22px; }
-      .card { font-size: 16px; }
-      .btn { padding: 12px 20px; font-size: 16px; }
-    }
+    .btn:active { transform: scale(0.96); }
+    h2 { margin-bottom: 8px; color: #4DA8E8; }
+    p { margin: 16px 0; color: #555; }
   </style>
 </head>
 <body>
-  <div class="debug-panel">
-    <button class="debug-btn" id="debug-toggle">🐛 调试</button>
-    <div class="debug-output" id="debug-output"></div>
+
+  <!-- 登录界面 -->
+  <div id="loginScreen" class="screen">
+    <h2>📘 Daily English</h2>
+    <p>请选择你的名字</p>
+    <button class="btn" id="btnNora">Nora（吴雨萌）</button>
+    <button class="btn" id="btnJoen">Joen（柯祖恩）</button>
+    <p style="font-size:12px; color:#999;">测试：点击按钮应切换到游戏界面</p>
   </div>
 
-  <!-- 🔑 Login Screen -->
-  <div id="login-screen" class="login-screen">
-    <h1 class="login-title">📘 Daily English</h1>
-    <p style="font-size:16px;margin-bottom:24px;color:#555;">请选择你的名字开始复习</p>
-    <div class="login-btns">
-      <button id="nora-btn" class="btn accent" data-student="Nora">Nora（吴雨萌）</button>
-      <button id="joen-btn" class="btn accent" data-student="Joen">Joen（柯祖恩）</button>
-    </div>
-    <p class="footer-note">你们一起在战斗！💪</p>
-  </div>
-
-  <!-- 🎮 Game Screen (hidden by default) -->
-  <div id="game-screen" style="display:none;">
-    <div class="container">
-      <div class="logo">
-        <span class="logo-icon">📘</span>
-        <h1>Daily English</h1>
-      </div>
-      <div class="student-info" id="student-name">Nora（吴雨萌）</div>
-
-      <!-- 🟨 Speech Activation Notice -->
-      <div id="speech-notice" style="
-        display: flex; align-items: center; justify-content: center;
-        background: #FFD200; color: #1E2B3C; font-weight: bold; padding: 12px;
-        font-size: 15px; margin: 8px 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        position: relative; z-index: 100;
-      ">
-        🔊 点击激活单词朗读 
-        <button id="speech-activate-btn" style="
-          background: #4DA8E8; color: white; border: none; border-radius: 20px;
-          padding: 6px 16px; margin-left: 10px; font-weight: bold; cursor: pointer;
-          transition: all 0.2s;
-        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-          激活 ✅
-        </button>
-      </div>
-
-      <div class="timer-progress">
-        <span>⏱️ 时间</span>
-        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-        <span id="timer">00:00</span>
-      </div>
-
-      <div class="grid" id="game-grid"></div>
-
-      <div class="instructions">
-        💡 点击一个英文词 → 再点一个中文词 → 配对成功即消失并朗读！<br>
-        ❌ 配对错误会抖动，错词将加入「错题本」加强复习。
-      </div>
-
-      <div style="text-align:center;margin:16px 0;">
-        <button id="leaderboard-btn" class="btn" style="background:#90CAF9;">🏆 排行榜</button>
-        <button id="review-btn" class="btn" style="background:#A5D6A7;">📝 错题本</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🏆 Leaderboard Modal -->
-  <div id="leaderboard-modal" class="modal">
-    <div class="modal-content">
-      <h2>🏆 学习排行榜</h2>
-      <div class="leaderboard">
-        <h3>能量球总数</h3>
-        <div class="player-row">
-          <span class="player-name">Nora（吴雨萌）</span>
-          <span class="player-score" id="nora-score">0</span>
-        </div>
-        <div class="player-row">
-          <span class="player-name">Joen（柯祖恩）</span>
-          <span class="player-score" id="joen-score">0</span>
-        </div>
-      </div>
-      <p class="footer-note">你们一起在战斗！💪</p>
-      <button class="btn" id="close-leaderboard">关闭</button>
-    </div>
-  </div>
-
-  <!-- 📝 Review Modal -->
-  <div id="review-modal" class="modal">
-    <div class="modal-content">
-      <h2>📝 错题本</h2>
-      <div id="review-list" style="text-align:left;margin:16px 0;line-height:1.6;font-size:15px;"></div>
-      <button class="btn" id="close-review">我知道了</button>
-    </div>
-  </div>
-
-  <!-- 🎯 Result Modal -->
-  <div id="result-modal" class="modal">
-    <div class="modal-content">
-      <h2>🎉 复习完成！</h2>
-      <div class="stars" id="stars-display"></div>
-      <p id="rank-text" style="font-size:16px;margin:12px 0;"></p>
-      <div class="stats">
-        <div class="stat-item">
-          <div>正确率</div>
-          <div class="stat-value" id="accuracy-value">100%</div>
-        </div>
-        <div class="stat-item">
-          <div>获得</div>
-          <div class="stat-value" id="energy-value">+10</div>
-        </div>
-      </div>
-      <p style="margin-top:16px;font-size:15px;color:#555;">
-        ✅ 本局共复习 6 个单词<br>
-        📚 错题已存入「错题本」，下次会重点出现！
-      </p>
-      <button class="btn accent" id="play-again">再玩一局</button>
-      <button class="btn" id="back-to-menu">返回主菜单</button>
-    </div>
+  <!-- 游戏界面（默认隐藏） -->
+  <div id="gameScreen" class="screen" style="display:none;">
+    <h2>🎮 游戏界面</h2>
+    <p>当前学生：<strong id="studentName"></strong></p>
+    <p style="font-size:14px; color:#999;">如果看到此界面，说明切换成功！</p>
+    <button class="btn" onclick="location.reload()">返回登录页</button>
   </div>
 
   <script>
-    // ======================
-    // 🐛 DEBUG HELPER
-    // ======================
-    const debugOutput = document.getElementById('debug-output');
-    const debugToggle = document.getElementById('debug-toggle');
-    
-    function debugLog(msg, type = 'info') {
-      console.log(`[DEBUG] ${msg}`);
-      if (debugOutput) {
-        const line = document.createElement('div');
-        line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        line.style.color = type === 'error' ? '#f66' : '#0f0';
-        debugOutput.appendChild(line);
-        debugOutput.scrollTop = debugOutput.scrollHeight;
-      }
-    }
+    // 等待页面加载完成后绑定事件
+    document.addEventListener('DOMContentLoaded', function() {
+      var btnNora = document.getElementById('btnNora');
+      var btnJoen = document.getElementById('btnJoen');
+      var loginScreen = document.getElementById('loginScreen');
+      var gameScreen = document.getElementById('gameScreen');
+      var studentName = document.getElementById('studentName');
 
-    // 全局错误捕获
-    window.onerror = function(msg, source, lineno, colno, error) {
-      debugLog(`❌ 全局错误: ${msg} (行: ${lineno})`, 'error');
-    };
-
-    debugToggle.addEventListener('click', () => {
-      if (debugOutput.style.display === 'block') {
-        debugOutput.style.display = 'none';
+      if (btnNora && btnJoen) {
+        btnNora.onclick = function() {
+          studentName.textContent = 'Nora（吴雨萌）';
+          loginScreen.style.display = 'none';
+          gameScreen.style.display = 'block';
+        };
+        btnJoen.onclick = function() {
+          studentName.textContent = 'Joen（柯祖恩）';
+          loginScreen.style.display = 'none';
+          gameScreen.style.display = 'block';
+        };
+        // 在页面角落显示一个绿色圆点，表示脚本执行成功
+        var dot = document.createElement('div');
+        dot.style.cssText = 'position:fixed;top:10px;right:10px;width:12px;height:12px;border-radius:6px;background:#34C759;z-index:9999;';
+        document.body.appendChild(dot);
       } else {
-        debugOutput.style.display = 'block';
-        debugLog('🐛 调试面板已打开，点击名字按钮查看日志');
+        alert('致命错误：按钮元素未找到，请检查HTML。');
       }
-    });
-
-    debugLog('脚本开始执行');
-
-    // ======================
-    // 🔑 CORE DATA & STORAGE
-    // ======================
-    const VOCAB = [
-      ['hello','你好'], ['goodbye','再见'], ['hi','嗨'], ['bye','拜拜'],
-      ['good morning','早上好'], ['good afternoon','下午好'], ['good evening','晚上好'], ['good night','晚安'],
-      ['one','一'], ['two','二'], ['three','三'], ['four','四'], ['five','五'],
-      ['six','六'], ['seven','七'], ['eight','八'], ['nine','九'], ['ten','十'],
-      ['red','红色'], ['blue','蓝色'], ['yellow','黄色'], ['green','绿色'],
-      ['orange','橙色'], ['purple','紫色'], ['pink','粉色'], ['white','白色'],
-      ['black','黑色'], ['brown','棕色'], ['what','什么'], ['your','你的'],
-      ['name','名字'], ['my','我的'], ['is','是'], ['I','我'], ['am','是'],
-      ['how','怎样'], ['are','是'], ['you','你'], ['fine','好的'],
-      ['thank','谢谢'], ['thanks','多谢'], ['please','请'], ['sorry','对不起'],
-      ['yes','是'], ['no','不'], ['number','数字'], ['colour','颜色']
-    ];
-
-    const STORAGE_KEYS = {
-      noraEnergy: 'daily_english_nora_energy',
-      joenEnergy: 'daily_english_joen_energy',
-      noraReview: 'daily_english_nora_review',
-      joenReview: 'daily_english_joen_review',
-      noraHistory: 'daily_english_nora_history',
-      joenHistory: 'daily_english_joen_history'
-    };
-
-    const LS = {
-      get(key, def = null) {
-        try {
-          const v = localStorage.getItem(key);
-          return v ? JSON.parse(v) : def;
-        } catch (e) {
-          debugLog(`LS get error: ${e.message}`, 'error');
-          return def;
-        }
-      },
-      set(key, val) {
-        try {
-          localStorage.setItem(key, JSON.stringify(val));
-        } catch (e) {
-          debugLog(`LS set error: ${e.message}`, 'error');
-        }
-      }
-    };
-
-    // Initialize storage defaults
-    if (LS.get(STORAGE_KEYS.noraEnergy) === null) LS.set(STORAGE_KEYS.noraEnergy, 0);
-    if (LS.get(STORAGE_KEYS.joenEnergy) === null) LS.set(STORAGE_KEYS.joenEnergy, 0);
-    if (LS.get(STORAGE_KEYS.noraReview) === null) LS.set(STORAGE_KEYS.noraReview, []);
-    if (LS.get(STORAGE_KEYS.joenReview) === null) LS.set(STORAGE_KEYS.joenReview, []);
-    if (LS.get(STORAGE_KEYS.noraHistory) === null) LS.set(STORAGE_KEYS.noraHistory, []);
-    if (LS.get(STORAGE_KEYS.joenHistory) === null) LS.set(STORAGE_KEYS.joenHistory, []);
-
-    // ======================
-    // 🎙️ SPEECH MODULE
-    // ======================
-    const Speech = {
-      synth: null,
-      isActivated: false,
-      init() {
-        if ('speechSynthesis' in window) {
-          this.synth = window.speechSynthesis;
-          debugLog('✅ Speech synthesis available');
-        } else {
-          debugLog('⚠️ Speech synthesis not available');
-        }
-      },
-      activate() {
-        if (this.isActivated) return;
-        try {
-          const dummy = new SpeechSynthesisUtterance('');
-          dummy.volume = 0;
-          this.synth.speak(dummy);
-          this.synth.cancel();
-          this.isActivated = true;
-          document.getElementById('speech-notice').style.display = 'none';
-          debugLog('✅ Speech activated');
-        } catch (e) {
-          debugLog(`🔊 Activation failed: ${e.message}`, 'error');
-        }
-      },
-      speak(text) {
-        if (!this.isActivated || !this.synth) return;
-        if (this.synth.speaking) this.synth.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'en-GB';
-        u.rate = 0.85;
-        this.synth.speak(u);
-      }
-    };
-
-    // ======================
-    // 🎮 GAME ENGINE
-    // ======================
-    let currentStudent = 'Nora';
-    let gameData = null;
-    let selectedCards = [];
-    let matchedCount = 0;
-    let startTime = null;
-    let timerInterval = null;
-    let gameActive = false;
-
-    function startGame(student) {
-      debugLog(`🚀 startGame called for ${student}`);
-      currentStudent = student;
-      document.getElementById('student-name').textContent = student === 'Nora' ? 'Nora（吴雨萌）' : 'Joen（柯祖恩）';
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('game-screen').style.display = 'block';
-
-      selectedCards = [];
-      matchedCount = 0;
-      gameActive = true;
-      document.getElementById('progress-fill').style.width = '0%';
-      document.getElementById('timer').textContent = '00:00';
-      clearInterval(timerInterval);
-
-      startTime = Date.now();
-      timerInterval = setInterval(updateTimer, 1000);
-
-      const shuffled = [...VOCAB].sort(() => Math.random() - 0.5).slice(0, 6);
-      const cards = [];
-      for (const [en, zh] of shuffled) {
-        cards.push({ type: 'en', word: en, meaning: zh, id: Math.random() });
-        cards.push({ type: 'zh', word: zh, meaning: en, id: Math.random() });
-      }
-      gameData = shuffle(cards);
-      renderGrid();
-    }
-
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
-
-    function renderGrid() {
-      const grid = document.getElementById('game-grid');
-      if (!grid) {
-        debugLog('❌ grid element not found', 'error');
-        return;
-      }
-      grid.innerHTML = '';
-      gameData.forEach((card, idx) => {
-        const el = document.createElement('div');
-        el.className = `card ${card.type}`;
-        el.textContent = card.word;
-        el.dataset.index = idx;
-        el.dataset.type = card.type;
-        el.addEventListener('click', () => handleCardClick(el));
-        grid.appendChild(el);
-      });
-      debugLog(`✅ Rendered ${gameData.length} cards`);
-    }
-
-    function handleCardClick(cardEl) {
-      if (!gameActive) return;
-      debugLog(`Card clicked: ${cardEl.textContent}`);
-      // 简化逻辑，仅用于测试点击是否有反应
-      cardEl.classList.toggle('selected');
-    }
-
-    function updateTimer() {
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      document.getElementById('timer').textContent = `${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`;
-    }
-
-    // ======================
-    // 🚀 INIT
-    // ======================
-    document.addEventListener('DOMContentLoaded', () => {
-      debugLog('📄 DOM fully loaded');
-
-      Speech.init();
-
-      const noraBtn = document.getElementById('nora-btn');
-      const joenBtn = document.getElementById('joen-btn');
-      
-      if (!noraBtn || !joenBtn) {
-        debugLog('❌ CRITICAL: Login buttons not found in DOM!', 'error');
-        return;
-      }
-
-      debugLog('✅ Login buttons found');
-
-      noraBtn.addEventListener('click', () => {
-        debugLog('🟡 Nora button clicked');
-        startGame('Nora');
-      });
-
-      joenBtn.addEventListener('click', () => {
-        debugLog('🟡 Joen button clicked');
-        startGame('Joen');
-      });
-
-      debugLog('✅ Event listeners attached');
     });
   </script>
 </body>
